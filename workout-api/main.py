@@ -38,3 +38,19 @@ async def user(user: user_dependency, db: db_dependency):
         raise HTTPException(status_code=401, detail="Authentification Failed")
     return {"User": user}
 
+
+@app.get("/", status_code=status.HTTP_200_OK)
+async def home(db):
+    exercises = db.query(models.Exercise).all()
+    return {"exercises": exercises }
+
+
+@app.get("/user/personal_workout/{user_id}")
+def workouts(user: user_dependency, db: db_dependency):
+    pass
+
+
+@app.get("/user/personal_goals/{user_id}")
+def goals(user: user_dependency, db: db_dependency):
+    pass
+
