@@ -9,12 +9,12 @@ weight tracking, and a library of preset exercises.
 
 **Installation Steps:**
 * Provided requirements.txt has every dependency needed
-* Requires uvicorn
-* Lauch main.py With uvicorn, Navigate to root directory where main.py is located,
+* Requires Docker and docker compose
+* Navigate to project folder and run ```docker compose up --build```
 Run uvicorn: 'uvicorn main:app'
 
 
 **API Endpoints (Examples):**
-* Register New User: `POST /auth/`
-* Requires Authentificated User: `/user`
+* Register New User: ```POST /auth/```
+* Requires Authentificated ```User: /user```
 
