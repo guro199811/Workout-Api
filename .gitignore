@@ -1,3 +1,4 @@
 .env
-
+database
+pgadmin-data
 */__pycache__

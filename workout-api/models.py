@@ -32,7 +32,7 @@ class Exercise_Type(Base):
     
     exercise_type_id = Column(Integer, primary_key=True, index=True)
     exercise_type_name = Column(String, unique=True)
-    exercises_array = Column(ARRAY)
+    exercises_array = Column(ARRAY(Integer))
 
 
 # Being Populated From Seed
@@ -52,7 +52,7 @@ class Exercise_Unit_Type(Base):
     __tablename__ = 'exercise_unit_types'
 
     unit_type_id = Column(Integer, primary_key=True, index=True)
-    exercises_array = Column(ARRAY)
+    exercises_array = Column(ARRAY(Integer))
     unit_1 = Column(String, nullable=False, unique=True)
     unit_2 = Column(String, nullable=True, unique=False)
 
@@ -62,13 +62,13 @@ class Goal(Base):
     
     goal_id = Column(Integer, primary_key=True, index=True)
     goal_name = Column(String)
-    user_id = Column(Integer, ForeignKey('users.id'))
+    user_id = Column(Integer, ForeignKey('users.user_id'))
     created_time = Column(DateTime, default=datetime.utcnow)
     start_date = Column(DateTime, nullable=True)
     end_date = Column(DateTime, nullable=True)
     range_min = Column(Integer)
     range_max = Column(Integer)
-    selected_exercises = Column(ARRAY)
+    selected_exercises = Column(ARRAY(Integer))
 
 
 # Predefined
@@ -77,7 +77,7 @@ class Goal_Type(Base):
 
     goal_type_id = Column(Integer, primary_key=True, index=True)
     goal_target = Column(String, unique=True)
-    target_specific_exercises = Column(ARRAY)
+    target_specific_exercises = Column(ARRAY(Integer))
     
 
 class Schedule(Base):
@@ -87,7 +87,7 @@ class Schedule(Base):
     goal_id = Column(Integer, ForeignKey('goals.goal_id') ,nullable=True)
     start_date = Column(DateTime, nullable=True)
     end_date = Column(DateTime, nullable=True)
-    selected_exercises = Column(ARRAY, nullable=True)
+    selected_exercises = Column(ARRAY(Integer), nullable=True)
     note = Column(String, default= "")
     extended_note = Column(String, default="")
     crontab_value = Column(String, default="")
@@ -96,6 +96,7 @@ class Schedule(Base):
 class User_History(Base):
     __tablename__ = "user_history"
 
+    history_id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey('users.user_id'))
     created = Column(DateTime, default=datetime.utcnow)
     weight_change = Column(Integer, nullable=True)
