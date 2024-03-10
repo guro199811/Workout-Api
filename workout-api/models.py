@@ -26,37 +26,6 @@ class User(Base):
     height_unit = Column(Integer)
 
 
-# Being Populated From Seed
-class Exercise_Type(Base):
-    __tablename__ = 'exercise_types'
-    
-    exercise_type_id = Column(Integer, primary_key=True, index=True)
-    exercise_type_name = Column(String, unique=True)
-    exercises_array = Column(ARRAY(Integer))
-
-
-# Being Populated From Seed
-class Exercise(Base):
-    __tablename__ = 'exercises'
-
-    exercise_id = Column(Integer, primary_key=True, index=True)
-    exercise_name = Column(String, nullable=False)
-    description = Column(String, nullable=False)
-    instructions = Column(String)
-    target_muscles = Column(String)
-    difficulty = Column(String)
-    
-
-
-class Exercise_Unit_Type(Base):
-    __tablename__ = 'exercise_unit_types'
-
-    unit_type_id = Column(Integer, primary_key=True, index=True)
-    exercises_array = Column(ARRAY(Integer))
-    unit_1 = Column(String, nullable=False, unique=True)
-    unit_2 = Column(String, nullable=True, unique=False)
-
-
 class Goal(Base):
     __tablename__ = 'goals'
     
@@ -69,15 +38,50 @@ class Goal(Base):
     range_min = Column(Integer)
     range_max = Column(Integer)
     selected_exercises = Column(ARRAY(Integer))
+    completed = Column(Boolean, default=False)
+    goal_type_id = Column(Integer, ForeignKey('goal_types.goal_type_id'))
 
 
-# Predefined
+# PBeing Populated From Seed
 class Goal_Type(Base):
     __tablename__ = 'goal_types'
 
     goal_type_id = Column(Integer, primary_key=True, index=True)
     goal_target = Column(String, unique=True)
-    target_specific_exercises = Column(ARRAY(Integer))
+
+
+# Being Populated From Seed
+class Exercise_Type(Base):
+    __tablename__ = 'exercise_types'
+    
+    exercise_type_id = Column(Integer, primary_key=True, index=True)
+    exercise_type_name = Column(String, unique=True)
+
+
+# Being Populated From Seed
+class Exercise_Unit_Type(Base):
+    __tablename__ = 'exercise_unit_types'
+
+    unit_type_id = Column(Integer, primary_key=True, index=True)
+    unit_1 = Column(String, nullable=False, unique=True)
+    unit_2 = Column(String, nullable=True, unique=False)
+
+
+
+# Being Populated From Seed
+class Exercise(Base):
+    __tablename__ = 'exercises'
+
+    exercise_id = Column(Integer, primary_key=True, index=True)
+    exercise_name = Column(String, nullable=False)
+    description = Column(String, nullable=False)
+    instructions = Column(String)
+    target_muscles = Column(String)
+    difficulty = Column(String)
+    exercise_type_id = Column(Integer, ForeignKey('exercise_types.exercise_type_id'))
+    unit_type_id = Column(Integer, ForeignKey('exercise_unit_types.unit_type_id'))
+    goal_type_id = Column(Integer, ForeignKey('goal_types.goal_type_id'))
+    
     
 
 class Schedule(Base):
@@ -88,7 +92,7 @@ class Schedule(Base):
     start_date = Column(DateTime, nullable=True)
     end_date = Column(DateTime, nullable=True)
     selected_exercises = Column(ARRAY(Integer), nullable=True)
-    note = Column(String, default= "")
+    note = Column(String, default="")
     extended_note = Column(String, default="")
     crontab_value = Column(String, default="")
 
