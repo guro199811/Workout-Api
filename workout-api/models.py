@@ -59,10 +59,10 @@ class Exercise_Type(Base):
 
 
 # Being Populated From Seed
-class Exercise_Unit_Type(Base):
-    __tablename__ = 'exercise_unit_types'
+class Exercise_Unit(Base):
+    __tablename__ = 'exercise_units'
 
-    unit_type_id = Column(Integer, primary_key=True, index=True)
+    unit_id = Column(Integer, primary_key=True, index=True)
     unit_1 = Column(String, nullable=False, unique=True)
     unit_2 = Column(String, nullable=True, unique=False)
 
@@ -79,7 +79,7 @@ class Exercise(Base):
     target_muscles = Column(String)
     difficulty = Column(String)
     exercise_type_id = Column(Integer, ForeignKey('exercise_types.exercise_type_id'))
-    unit_type_id = Column(Integer, ForeignKey('exercise_unit_types.unit_type_id'))
+    unit_type_id = Column(Integer, ForeignKey('exercise_units.unit_id'))
     goal_type_id = Column(Integer, ForeignKey('goal_types.goal_type_id'))
     
     

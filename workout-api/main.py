@@ -8,6 +8,9 @@ from auth import get_current_user
 
 
 
+
+
+
 # Creating FastAPI instance
 app = FastAPI()
 
@@ -43,7 +46,7 @@ async def user(user: user_dependency, db: db_dependency):
 
 # For Main Page, Contains Exercises for displaying on main page
 @app.get("/", status_code=status.HTTP_200_OK)
-async def main(db):
+async def main(db: db_dependency):
     exercises = db.query(models.Exercise).all()
     #For Loop Here to extract exercise
     return {"exercises": exercises }

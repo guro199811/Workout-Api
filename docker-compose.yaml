@@ -30,6 +30,9 @@ services:
       PGADMIN_DEFAULT_PASSWORD: admin
     ports:
       - "5010:80"
+    
+    logging:
+      driver: "none"
 
     depends_on:
       - postgresql
