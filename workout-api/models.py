@@ -16,28 +16,23 @@ from datetime import datetime
 class User(Base):
     __tablename__ = 'users'
 
-    id= Column(Integer, primary_key=True, index=True)
+    user_id= Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True, nullable=False)
     fullname = Column(String)
-    mail = Column(String, unique=True, nullable=False)
-    phone = Column(String) # String- it allows for Prefixes
     hashed_password = Column(String, nullable=False)
-
-
-# Being Populated From Seed
-class Exercise_Unit(Base):
-    __tablename__ = 'exercise_units'
-
-    unit_id = Column(Integer, primary_key=True, index=True)
-    unit_type = Column(String, unique=True)
+    weight = Column(Integer)
+    weight_unit = Column(String)
+    height = Column(Integer)
+    height_unit = Column(Integer)
 
 
 # Being Populated From Seed
 class Exercise_Type(Base):
     __tablename__ = 'exercise_types'
     
-    type_id = Column(Integer, primary_key=True, index=True)
-    workout_type = Column(String, unique=True)
+    exercise_type_id = Column(Integer, primary_key=True, index=True)
+    exercise_type_name = Column(String, unique=True)
+    exercises_array = Column(ARRAY)
 
 
 # Being Populated From Seed
@@ -49,36 +44,62 @@ class Exercise(Base):
     description = Column(String, nullable=False)
     instructions = Column(String)
     target_muscles = Column(String)
-    calories_per_minute = Column(Integer)
     difficulty = Column(String)
-    type_id = Column(Integer, ForeignKey('exercise_types.type_id'), nullable=False)
-    unit_id = Column(Integer, ForeignKey('exercise_units.unit_id'), nullable=False)
+    
 
 
-class Weight_Tracker(Base):
-    __tablename__ = 'weight_tracker'
+class Exercise_Unit_Type(Base):
+    __tablename__ = 'exercise_unit_types'
 
-    tracker_id = Column(Integer, primary_key=True, index=True)
-    person_id = Column(Integer, ForeignKey('users.id'))
-    weight = Column(Integer)
-    weight_recorded = Column(DateTime, default=datetime.utcnow)
-
-
-class Workout_Tracker(Base):
-    __tablename__ = 'workout_tracker'
-
-    workout_id = Column(Integer, primary_key=True, index=True)
-    person_id = Column(Integer, ForeignKey('users.id'))
-    exercises = Column(String) # This Needs To Be array, if i forget to change it back
-    comment = Column(String)
-    due_time = Column(DateTime, nullable=True)
+    unit_type_id = Column(Integer, primary_key=True, index=True)
+    exercises_array = Column(ARRAY)
+    unit_1 = Column(String, nullable=False, unique=True)
+    unit_2 = Column(String, nullable=True, unique=False)
 
 
-class Goal_Tracker(Base):
-    __tablename__ = 'goal_tracker'
+class Goal(Base):
+    __tablename__ = 'goals'
     
     goal_id = Column(Integer, primary_key=True, index=True)
-    person_id = Column(Integer, ForeignKey('users.id'))
+    goal_name = Column(String)
+    user_id = Column(Integer, ForeignKey('users.id'))
     created_time = Column(DateTime, default=datetime.utcnow)
-    goal_description = Column(String)
-    due_time = Column(DateTime, nullable=True)
+    start_date = Column(DateTime, nullable=True)
+    end_date = Column(DateTime, nullable=True)
+    range_min = Column(Integer)
+    range_max = Column(Integer)
+    selected_exercises = Column(ARRAY)
+
+
+# Predefined
+class Goal_Type(Base):
+    __tablename__ = 'goal_types'
+
+    goal_type_id = Column(Integer, primary_key=True, index=True)
+    goal_target = Column(String, unique=True)
+    target_specific_exercises = Column(ARRAY)
+    
+
+class Schedule(Base):
+    __tablename__ = "schedules"
+
+    schedule_id = Column(Integer, primary_key=True, index=True)
+    goal_id = Column(Integer, ForeignKey('goals.goal_id') ,nullable=True)
+    start_date = Column(DateTime, nullable=True)
+    end_date = Column(DateTime, nullable=True)
+    selected_exercises = Column(ARRAY, nullable=True)
+    note = Column(String, default= "")
+    extended_note = Column(String, default="")
+    crontab_value = Column(String, default="")
+
+
+class User_History(Base):
+    __tablename__ = "user_history"
+
+    user_id = Column(Integer, ForeignKey('users.user_id'))
+    created = Column(DateTime, default=datetime.utcnow)
+    weight_change = Column(Integer, nullable=True)
+    height_change = Column(Integer, nullable=True)
+    bmi_calculation = Column(Integer, nullable=True)
+    goal_id = Column(Integer, ForeignKey('goals.goal_id'), nullable=True)
+    schedule_id = Column(Integer, ForeignKey('schedules.schedule_id'), nullable=True)

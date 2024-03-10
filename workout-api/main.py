@@ -45,6 +45,7 @@ async def user(user: user_dependency, db: db_dependency):
 @app.get("/", status_code=status.HTTP_200_OK)
 async def main(db):
     exercises = db.query(models.Exercise).all()
+    #For Loop Here to extract exercise
     return {"exercises": exercises }
 
 
