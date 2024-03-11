@@ -40,9 +40,9 @@ oauth2_bearer = OAuth2PasswordBearer(tokenUrl='auth/token')
 class CreateUserRequest(BaseModel):
     username: str
     fullname : str
-    mail: str
-    phone: str #Its String Because of prefixes user might input
     password: str
+    weight: int
+    height: int
 
 
 class Token(BaseModel):
@@ -63,20 +63,19 @@ def get_db():
 db_dependency = Annotated[Session, Depends(get_db)]
 
 
-
 # Creating User Model
-@router.post("/", status_code=status.HTTP_201_CREATED)
+@router.post("/register", status_code=status.HTTP_201_CREATED)
 async def create_user(db: db_dependency,
                       create_user_request: CreateUserRequest): # Passing CreateUserRequest for field Validation
 
     create_user_model = User(
         username = create_user_request.username,
         fullname = create_user_request.fullname,
-        mail = create_user_request.mail,
-        phone = create_user_request.phone,
         hashed_password = bcrypt_context.hash(
             create_user_request.password
-            ) # Hashing Password To hs256 algorithm
+            ), # Hashing Password To hs256 algorithm
+        weight = create_user_request.weight,
+        height = create_user_request.height
     )
 
     #Commiting Db Additions
@@ -85,52 +84,61 @@ async def create_user(db: db_dependency,
 
 
 # authentificating users using custom made function that queries user
-@router.post("/token", response_model=Token)
+@router.post("/login", response_model=Token)
 async def login_for_access_token(
 form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
 db: db_dependency):
-    
+    # authenticate_user is a function that verifies the user's data
+    # it also decrypts bcrypted/hashed password
     user = authenticate_user(form_data.username, form_data.password, db)
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail='Could not validate user.')
-    token = create_access_token(user.username, user.id, timedelta(minutes=60)) # Time For Token To be alive
+    token = create_access_token(user.username, user.user_id, timedelta(minutes=60)) # Time For Token To be alive
     return {'access_token': token, 'token_type': 'bearer'}  # Returning a dictionary
+
 
 # custom made function that queries user
 def authenticate_user(username: str, password: str, db):
     #Quering User By Unique Username
     user = db.query(User).filter(User.username == username).first()
     if not user:
-        return False
+        return HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Could not find specified username.')
     #Checking Decrypted password with .verify
     if not bcrypt_context.verify(password, user.hashed_password):
-        return False
+        return HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail='Password is not Bcrypted.')
     return user
 
 
 #JWT Encoding
 def create_access_token(username: str, user_id: int, expires_delta: timedelta):
-    encode = {"sub": username, "id": user_id}
-    expires = datetime.utcnow() + expires_delta
-    encode.update({'exp': expires})
-    return jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)
-
+    try:
+        encode = {"sub": username, "id": user_id}
+        expires = datetime.utcnow() + expires_delta
+        encode.update({'exp': expires})
+        return jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)
+    except JWTError:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                detail='Cant Encode The request.')
 
 #JWT Decoding
 async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]):
     try:
         # If Decoded Fails, We raise an exception down below
-        decoded = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        decode = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
 
         # Decoding username and user_id
-        username: str = decoded.get('sub')
-        user_id: int = decoded.get('id')
+        username: str = decode.get('sub')
+        user_id: int = decode.get('id')
         # Checking For username to not be none / user_id to not be none
         if username is None or user_id is None:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                                 detail='Could not validate user.')
-        return {'username': username, 'id': user_id}
+        return {'username': username, 'user_id': user_id}
     except JWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                                 detail='Could not validate user.')

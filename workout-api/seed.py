@@ -269,10 +269,6 @@ def populate_exercise_type(exercise_type_data, db = db):
                     new_exercise_type = Exercise_Type(**exercise_type)
                     db.add(new_exercise_type)
             db.commit()
-        else:
-            # nothing is nothing, no variable, None :) (if confused: confusion = False)
-            nothing = None
-            pass
     except Exception as e:
         logging.warning(e)
 

@@ -21,9 +21,7 @@ class User(Base):
     fullname = Column(String)
     hashed_password = Column(String, nullable=False)
     weight = Column(Integer)
-    weight_unit = Column(String)
     height = Column(Integer)
-    height_unit = Column(Integer)
 
 
 class Goal(Base):
