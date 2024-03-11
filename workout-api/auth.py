@@ -63,6 +63,7 @@ def get_db():
 db_dependency = Annotated[Session, Depends(get_db)]
 
 
+
 # Creating User Model
 @router.post("/register", status_code=status.HTTP_201_CREATED)
 async def create_user(db: db_dependency,
@@ -79,13 +80,19 @@ async def create_user(db: db_dependency,
     )
 
     #Commiting Db Additions
-    db.add(create_user_model)
-    db.commit() 
+    try:
+        db.add(create_user_model)
+        db.commit() 
+        return {"User": "Created Succesfully"}
+    except:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT,
+                            detail="Username Already Exists \ Taken")
+
 
 
 # authentificating users using custom made function that queries user
-@router.post("/login", response_model=Token)
-def login_for_access_token(
+@router.post("/token", response_model=Token)
+async def login_for_access_token(
 form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
 db: db_dependency):
     # authenticate_user is a function that verifies the user's data
@@ -96,6 +103,7 @@ db: db_dependency):
                             detail='Could not validate user.')
     token = create_access_token(user.username, user.user_id, timedelta(minutes=60)) # Time For Token To be alive
     return {'access_token': token, 'token_type': 'bearer'}  # Returning a dictionary
+
 
 
 # custom made function that queries user
@@ -125,8 +133,9 @@ def create_access_token(username: str, user_id: int, expires_delta: timedelta):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                                 detail='Cant Encode The request.')
 
+
 #JWT Decoding
-def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]):
+async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]):
     try:
         # If Decoded Fails, We raise an exception down below
         decode = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
@@ -138,7 +147,7 @@ def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]):
         if username is None or user_id is None:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                                 detail='Could not validate user.')
-        return {'username': username, 'user_id': user_id}
+        return {'username': username, 'id': user_id}
     except JWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                                 detail='Could not validate user.')
