@@ -85,7 +85,7 @@ async def create_user(db: db_dependency,
 
 # authentificating users using custom made function that queries user
 @router.post("/login", response_model=Token)
-async def login_for_access_token(
+def login_for_access_token(
 form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
 db: db_dependency):
     # authenticate_user is a function that verifies the user's data
@@ -126,7 +126,7 @@ def create_access_token(username: str, user_id: int, expires_delta: timedelta):
                                 detail='Cant Encode The request.')
 
 #JWT Decoding
-async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]):
+def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]):
     try:
         # If Decoded Fails, We raise an exception down below
         decode = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
