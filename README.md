@@ -19,5 +19,6 @@ Run uvicorn: 'uvicorn main:app'
 * Log-in (Stateless) ```POST: /auth/login/```
 * Get User Data ```GET: /user```
 * Main Page (exercises joined with exercise_types ordered by exercise_type_id) ```GET: /```
+* Query Exercises by exercise_id ```GET: /exercises/{exercise_id} ```
 
 

@@ -39,7 +39,7 @@ class Goal(Base):
     selected_exercises = Column(ARRAY(Integer))
     completed = Column(Boolean, default=False)
     goal_type_id = Column(Integer, ForeignKey('goal_types.goal_type_id'))
-
+    goal_type = relationship("Goal_Type", back_populates="goal")
 
 # PBeing Populated From Seed
 class Goal_Type(Base):
@@ -47,6 +47,8 @@ class Goal_Type(Base):
 
     goal_type_id = Column(Integer, primary_key=True, index=True)
     goal_target = Column(String, unique=True)
+    exercises = relationship("Exercise", back_populates="goal_type")
+    goal = relationship("Goal", back_populates="goal_type")
 
 
 # Being Populated From Seed
@@ -82,7 +84,7 @@ class Exercise(Base):
     exercise_type = relationship("Exercise_Type", back_populates="exercises")
     unit_type_id = Column(Integer, ForeignKey('exercise_units.unit_id'))
     goal_type_id = Column(Integer, ForeignKey('goal_types.goal_type_id'))
-    
+    goal_type = relationship("Goal_Type", back_populates="exercises")
     
 
 class Schedule(Base):
