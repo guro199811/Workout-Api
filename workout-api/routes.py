@@ -87,26 +87,32 @@ def change_user_data(user: user_dependency, db: db_dependency, user_request: Cha
 
     # Map the fields to their corresponding changes
     changes = {
+        'fullname': user_request.fullname,
         'weight': user_request.weight,
-        'height': user_request.height
+        'height': user_request.height,
     }
 
     # Initializing changes to None
+    fullname_change = None
     weight_change = None
     height_change = None
+
 
     # Iterating over the changes and updating the user data
     for field, value in changes.items():
         if getattr(user, field) != value:
             setattr(user, field, value)
             # Update the change variables
-            if field == 'weight':
+            if field == 'fullname':
+                fullname_change = value
+            elif field == 'weight':
                 weight_change = value
             elif field == 'height':
                 height_change = value
+            
 
     # Add the changes to the User_History table
-    add_history(db, user, weight_change, height_change)
+    add_history(db, user, fullname_change, weight_change, height_change)
 
     try:
         db.commit()
@@ -295,16 +301,31 @@ def edit_personal_goal(user: user_dependency, goal: GoalRequestModel, goal_id: i
     if not db_goal:
         raise HTTPException(status_code=404, detail="Goal not found")
 
+    # we need user query for add_history functon
+    user_db = db.query(User).filter(User.user_id == user['id']).first()
+
     # Checking for goal_type
     if goal.goal_type_id is not None:
         goal_type = db.query(Goal_Type).filter(Goal_Type.goal_type_id == goal.goal_type_id).first()
         if not goal_type:
-            raise HTTPException(status_code=404, detail="Goal type not found")
+            raise HTTPException(status_code=404, detail="Specific Goal type not found")
         db_goal.goal_type_id = goal_type.goal_type_id
 
-    for key, value in goal.dict().items():
-        if value is not None:
+    changes = goal.dict() # Request model can be dictionarized
+
+    # the original goal state
+    goal_changed_from = {column.name: getattr(db_goal, column.name) for column in db_goal.__table__.columns}
+
+    # Iterate over the changes and update the goal data
+    for key, value in changes.items():
+        if value is not None and getattr(db_goal, key) != value:
             setattr(db_goal, key, value)
+
+    # new goal state
+    goal_changed_to = {column.name: getattr(db_goal, column.name) for column in db_goal.__table__.columns}
+
+
+    add_history(db, user_db, goal_changed_from=goal_changed_from, goal_changed_to=goal_changed_to)
 
     db.commit()
     db.refresh(db_goal)
@@ -312,7 +333,7 @@ def edit_personal_goal(user: user_dependency, goal: GoalRequestModel, goal_id: i
     return db_goal
 
 
-# Deleteability for personal goals
+# Deletability for personal goals
 @router.delete("/user/personal_goals/{goal_id}")
 def delete_personal_goal(user: user_dependency, goal_id: int, db: db_dependency):
     db_goal = db.query(Goal).filter(Goal.user_id == user['id'], Goal.goal_id == goal_id).first()
@@ -432,12 +453,16 @@ def get_personal_schedules(user: user_dependency, db: db_dependency):
 
 @router.put("/user/schedules/{schedule_id}")
 def edit_personal_schedule(user: user_dependency ,schedule: ScheduleRequestModel, schedule_id: int, db: db_dependency):
+    # Querying Schedule with user_id and specified schedule_id
     db_schedule = db.query(Schedule).filter(
     Schedule.user_id == user['id'], 
     Schedule.schedule_id == schedule_id).first()
 
     if not db_schedule:
         raise HTTPException(status_code=404, detail="Schedule not found")
+    
+    # we need user query for add_history function
+    user_db = db.query(User).filter(User.user_id == user['id']).first()
 
     if schedule.goal_id:
         goal = db.query(Goal).filter(Goal.goal_id == schedule.goal_id).first()
@@ -445,14 +470,25 @@ def edit_personal_schedule(user: user_dependency ,schedule: ScheduleRequestModel
             selected_exercises = list(set(goal.selected_exercises).union(schedule.selected_exercises))
             schedule.selected_exercises = selected_exercises
 
+    # original schedule state
+    schedule_changed_from = {column.name: getattr(db_schedule, column.name) for column in db_schedule.__table__.columns}
+
+    # Iterating over the changes and update the schedule data
     for attr, value in schedule.dict().items():
         if value is not None:
             setattr(db_schedule, attr, value)
+
+    # new schedule state
+    schedule_changed_to = {column.name: getattr(db_schedule, column.name) for column in db_schedule.__table__.columns}
+
+    # Adding the changes to the User_History table
+    add_history(db, user_db, schedule_changed_from=schedule_changed_from, schedule_changed_to=schedule_changed_to)
 
     db.commit()
     db.refresh(db_schedule)
 
     return db_schedule
+
 
 
 
@@ -492,26 +528,42 @@ def get_user_history(user: user_dependency, db: db_dependency):
             history_dict['height_change'] = history.height_change
         if history.bmi_calculation is not None:
             history_dict['bmi_calculation'] = history.bmi_calculation
-        if history.goal_id is not None:
-            related_goal = db.query(Goal).filter(
-                Goal.goal_id == history.goal_id).first()
-            history_dict['goal'] = {column.name: getattr(
-                related_goal, column.name) for column in 
-                related_goal.__table__.columns}
-        if history.schedule_id is not None:
-            related_schedule = db.query(Schedule).filter(
-                Schedule.schedule_id == history.schedule_id).first()
-            history_dict['schedule'] = {column.name: getattr(
-                related_schedule, column.name) for column in 
-                related_schedule.__table__.columns}
+        if history.goal_changed_from is not None:
+            history_dict['goal_changed_from'] = history.goal_changed_from
+        if history.goal_changed_to is not None:
+            history_dict['goal_changed_to'] = history.goal_changed_to
+        if history.schedule_changed_from is not None:
+            history_dict['schedule_changed_from'] = history.schedule_changed_from
+        if history.schedule_changed_to is not None:
+            history_dict['schedule_changed_to'] = history.schedule_changed_to
         result.append(history_dict)
     return result
 
 
 
-def add_history(db, user, fullname_change = None, weight_change=None, 
-                height_change=None, bmi_calculation=None, goal_id=None, 
-                schedule_id=None):
+
+@router.delete("/user/history/{history_id}")
+def delete_user_history(user: user_dependency, db: db_dependency, history_id: int):
+    history = db.query(User_History).filter(
+        User_History.user_id == user['id'],
+        User_History.history_id == history_id
+    )
+
+    if not history:
+        raise HTTPException(status_code=404, detail="history not found")
+    
+    db.delete(history)
+    db.commit()
+
+    return {"message": "History Successfully deleted"}
+
+
+
+def add_history(
+        db, user, fullname_change = None, weight_change=None, 
+        height_change=None, bmi_calculation=None, 
+        goal_changed_from=None, goal_changed_to=None,
+        schedule_changed_from = None, schedule_changed_to = None):
     
     new_history = User_History(
         user_id=user.user_id,
@@ -519,10 +571,20 @@ def add_history(db, user, fullname_change = None, weight_change=None,
         weight_change=weight_change,
         height_change=height_change,
         bmi_calculation=bmi_calculation,
-        goal_id=goal_id,
-        schedule_id=schedule_id
+
+        goal_changed_from=goal_changed_from, 
+        goal_changed_to=goal_changed_to,
+
+        schedule_changed_from=schedule_changed_from, 
+        schedule_changed_to=schedule_changed_to
     )
     db.add(new_history)
     db.commit()
     db.refresh(new_history)
     return new_history
+
+
+@router.post("/add_bmi_history/{bmi_value}")
+def bmi_history_addition(user: user_dependency, db: db_dependency, bmi_value: int):
+    user_db = db.query(User).filter(User.user_id == user['id']).first()
+    add_history(db, user_db.user_id, bmi_calculation=bmi_value)

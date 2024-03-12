@@ -7,7 +7,8 @@ from sqlalchemy import (
     Boolean,
     ForeignKey,
     DateTime,
-    ARRAY
+    ARRAY,
+    JSON
 )
 
 from datetime import datetime
@@ -88,6 +89,7 @@ class Exercise(Base):
     goal_type = relationship("Goal_Type", back_populates="exercises")
     
 
+
 class Schedule(Base):
     __tablename__ = "schedules"
 
@@ -102,6 +104,8 @@ class Schedule(Base):
     crontab_value = Column(String, default="")
     goal = relationship("Goal", back_populates='schedule')
 
+
+
 class User_History(Base):
     __tablename__ = "user_history"
 
@@ -112,5 +116,7 @@ class User_History(Base):
     weight_change = Column(Integer, nullable=True)
     height_change = Column(Integer, nullable=True)
     bmi_calculation = Column(Integer, nullable=True)
-    goal_id = Column(Integer, ForeignKey('goals.goal_id'), nullable=True)
-    schedule_id = Column(Integer, ForeignKey('schedules.schedule_id'), nullable=True)
+    goal_changed_from = Column(JSON, nullable=True)
+    goal_changed_to = Column(JSON, nullable=True)
+    schedule_changed_from = Column(JSON, nullable=True)
+    schedule_changed_to = Column(JSON, nullable=True)

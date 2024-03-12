@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Create db
+python database.py
 
 # Populate Database
 python seed.py
