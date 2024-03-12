@@ -1,16 +1,11 @@
 # Datetime is for Expiration of JWT
 from datetime import timedelta, datetime
 from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 
-# Basemodel For Validation of the user
-from pydantic import BaseModel
 from sqlalchemy.orm import Session
-
-# Status for Returning correct status code back to the user
 from starlette import status
 from database import SessionLocal
-from models import User
 from passlib.context import CryptContext
 
 # Form To Pass 2 Password auth
@@ -20,6 +15,22 @@ from jose import jwt, JWTError
 # For Debugging
 import logging
 
+from models import User
+
+from form_models import CreateUserRequest, Token
+
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+db_dependency = Annotated[Session, Depends(get_db)]
+
+# For User Authentification
 
 auth = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -35,32 +46,7 @@ bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl="auth/token")
 
 
-# Data Validation
-class CreateUserRequest(BaseModel):
-    username: str
-    fullname: str
-    password: str
-    weight: int
-    height: int
-
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-
-
 # Dependency For Database
-
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
-db_dependency = Annotated[Session, Depends(get_db)]
 
 
 # Creating User Model

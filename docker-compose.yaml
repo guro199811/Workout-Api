@@ -1,27 +1,30 @@
 version: '3.9'
 
 services:
-  app:
+  workout-app:
     build: 
-      context: ./workout-api/
+      context: ./
       dockerfile: Dockerfile
     container_name: Workout-Api
     ports:
       - "8000:8000"
 
     depends_on:
-      - postgresql
-  postgresql:
+      - workout_postgresql
+    volumes:
+      - ./workout-api:/workout-api
+    restart: always
+    
+  workout_postgresql:
     image: postgres:latest
     container_name: PostgreSQL
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: workoutdb
-    # ports:
-    #   - 5151:5432
     volumes:
       - ~/apps/postgres:/var/lib/postgresql/data
+
   pgadmin:
     image: dpage/pgadmin4
     container_name: PGadmin4
@@ -35,4 +38,4 @@ services:
       driver: "none"
 
     depends_on:
-      - postgresql
+      - workout_postgresql
