@@ -1,40 +1,33 @@
 from database import SessionLocal
-from models import (
-    Exercise, 
-    Exercise_Type,
-    Exercise_Unit,
-    Goal_Type)
+from models import Exercise, Exercise_Type, Exercise_Unit, Goal_Type
 
 import logging
 
 db = SessionLocal()
 
 
-
-
-
 # Exercise Type Data for easy filtering
-exercise_type_data =[
-    { "exercise_type_name":'Endurence' },
-    { "exercise_type_name":'Strength' },
-    { "exercise_type_name":'Balance' },
-    { "exercise_type_name":'Flexibility' }
+exercise_type_data = [
+    {"exercise_type_name": "Endurence"},
+    {"exercise_type_name": "Strength"},
+    {"exercise_type_name": "Balance"},
+    {"exercise_type_name": "Flexibility"},
 ]
 
 
 # Exercise unit types for unit management
-exercise_unit_types =[
-    {"unit_1": 'Km', "unit_2": "M"},
-    {"unit_1": 'Sets', "unit_2": 'Reps'}
+exercise_unit_types = [
+    {"unit_1": "Km", "unit_2": "M"},
+    {"unit_1": "Sets", "unit_2": "Reps"},
 ]
 
 
 # Goal Types for Filtering Goal Specific exercises
 goal_types = [
-    {"goal_target": 'Weight'},
-    {"goal_target": 'Distance'},
-    {"goal_target": 'Speed'},
-    {"goal_target": 'Strength'}
+    {"goal_target": "Weight"},
+    {"goal_target": "Distance"},
+    {"goal_target": "Speed"},
+    {"goal_target": "Strength"},
 ]
 
 
@@ -48,7 +41,7 @@ exercises_data = [
         "difficulty": "Intermediate",
         "exercise_type_id": 2,
         "unit_type_id": 2,
-        "goal_type_id": 4
+        "goal_type_id": 4,
     },
     {
         "exercise_name": "Squats",
@@ -58,7 +51,7 @@ exercises_data = [
         "difficulty": "Beginner",
         "exercise_type_id": 3,
         "unit_type_id": 2,
-        "goal_type_id": 1
+        "goal_type_id": 1,
     },
     {
         "exercise_name": "Lunges",
@@ -68,7 +61,7 @@ exercises_data = [
         "difficulty": "Intermediate",
         "exercise_type_id": 3,
         "unit_type_id": 2,
-        "goal_type_id": 1
+        "goal_type_id": 1,
     },
     {
         "exercise_name": "Deadlifts",
@@ -78,7 +71,7 @@ exercises_data = [
         "difficulty": "Advanced",
         "exercise_type_id": 2,
         "unit_type_id": 2,
-        "goal_type_id": 2
+        "goal_type_id": 2,
     },
     {
         "exercise_name": "Pull-ups",
@@ -88,7 +81,7 @@ exercises_data = [
         "difficulty": "Advanced",
         "exercise_type_id": 4,
         "unit_type_id": 2,
-        "goal_type_id": 4
+        "goal_type_id": 4,
     },
     {
         "exercise_name": "Rows",
@@ -98,7 +91,7 @@ exercises_data = [
         "difficulty": "Intermediate",
         "exercise_type_id": 2,
         "unit_type_id": 2,
-        "goal_type_id": 4
+        "goal_type_id": 4,
     },
     {
         "exercise_name": "Overhead Press",
@@ -108,7 +101,7 @@ exercises_data = [
         "difficulty": "Intermediate",
         "exercise_type_id": 2,
         "unit_type_id": 2,
-        "goal_type_id": 4
+        "goal_type_id": 4,
     },
     {
         "exercise_name": "Bench Press",
@@ -118,7 +111,7 @@ exercises_data = [
         "difficulty": "Advanced",
         "exercise_type_id": 2,
         "unit_type_id": 2,
-        "goal_type_id": 4
+        "goal_type_id": 4,
     },
     {
         "exercise_name": "Plank",
@@ -128,7 +121,7 @@ exercises_data = [
         "difficulty": "Intermediate",
         "exercise_type_id": 3,
         "unit_type_id": 2,
-        "goal_type_id": 1
+        "goal_type_id": 1,
     },
     {
         "exercise_name": "Romanian Deadlift",
@@ -138,7 +131,7 @@ exercises_data = [
         "difficulty": "Advanced",
         "exercise_type_id": 2,
         "unit_type_id": 2,
-        "goal_type_id": 4
+        "goal_type_id": 4,
     },
     {
         "exercise_name": "Side Plank",
@@ -148,7 +141,7 @@ exercises_data = [
         "difficulty": "Intermediate",
         "exercise_type_id": 1,
         "unit_type_id": 2,
-        "goal_type_id": 1
+        "goal_type_id": 1,
     },
     {
         "exercise_name": "Bicep Curls",
@@ -158,7 +151,7 @@ exercises_data = [
         "difficulty": "Beginner",
         "exercise_type_id": 2,
         "unit_type_id": 2,
-        "goal_type_id": 4
+        "goal_type_id": 4,
     },
     {
         "exercise_name": "Running",
@@ -168,7 +161,7 @@ exercises_data = [
         "difficulty": "Beginner to Advanced (depending on pace and distance)",
         "exercise_type_id": 1,
         "unit_type_id": 1,
-        "goal_type_id": 2
+        "goal_type_id": 2,
     },
     {
         "exercise_name": "Shoulder Raises",
@@ -178,7 +171,7 @@ exercises_data = [
         "difficulty": "Beginner",
         "exercise_type_id": 4,
         "unit_type_id": 2,
-        "goal_type_id": 4
+        "goal_type_id": 4,
     },
     {
         "exercise_name": "Walking Lunges",
@@ -188,7 +181,7 @@ exercises_data = [
         "difficulty": "Intermediate",
         "exercise_type_id": 3,
         "unit_type_id": 1,
-        "goal_type_id": 3
+        "goal_type_id": 3,
     },
     {
         "exercise_name": "Fast Walking",
@@ -198,7 +191,7 @@ exercises_data = [
         "difficulty": "Beginner",
         "exercise_type_id": 1,
         "unit_type_id": 1,
-        "goal_type_id": 2
+        "goal_type_id": 2,
     },
     {
         "exercise_name": "Calf Raises",
@@ -208,7 +201,7 @@ exercises_data = [
         "difficulty": "Beginner",
         "exercise_type_id": 3,
         "unit_type_id": 2,
-        "goal_type_id": 1
+        "goal_type_id": 1,
     },
     {
         "exercise_name": "Sprinting",
@@ -218,7 +211,7 @@ exercises_data = [
         "difficulty": "Advanced",
         "exercise_type_id": 1,
         "unit_type_id": 1,
-        "goal_type_id": 3
+        "goal_type_id": 3,
     },
     {
         "exercise_name": "Bicycling",
@@ -228,7 +221,7 @@ exercises_data = [
         "difficulty": "Beginner to Advanced (depending on pace and resistance)",
         "exercise_type_id": 3,
         "unit_type_id": 1,
-        "goal_type_id": 1
+        "goal_type_id": 1,
     },
     {
         "exercise_name": "Jumping Jacks",
@@ -238,17 +231,15 @@ exercises_data = [
         "difficulty": "Beginner",
         "exercise_type_id": 4,
         "unit_type_id": 2,
-        "goal_type_id": 1
-    }
+        "goal_type_id": 1,
+    },
 ]
 
 
-
-
-def populate_exercise(exercise_data, db = db):
+def populate_exercise(exercise_data, db=db):
     try:
         exercise_query = db.query(Exercise).first()
-        if exercise_query is None:  
+        if exercise_query is None:
             if exercise_data:
                 for exercise in exercise_data:
                     new_exercise = Exercise(**exercise)
@@ -259,11 +250,11 @@ def populate_exercise(exercise_data, db = db):
         db.rollback()
 
 
-def populate_exercise_type(exercise_type_data, db = db):
+def populate_exercise_type(exercise_type_data, db=db):
     try:
 
         exercise_type_query = db.query(Exercise_Type).first()
-        if exercise_type_query is None:  
+        if exercise_type_query is None:
             if exercise_type_data:
                 for exercise_type in exercise_type_data:
                     new_exercise_type = Exercise_Type(**exercise_type)
@@ -273,11 +264,10 @@ def populate_exercise_type(exercise_type_data, db = db):
         logging.warning(e)
 
 
-
-def populate_exercise_unit(exercise_unit_type_data, db = db):
+def populate_exercise_unit(exercise_unit_type_data, db=db):
     try:
         exercise_unit_type = db.query(Exercise_Unit).first()
-        if exercise_unit_type is None:  
+        if exercise_unit_type is None:
             if exercise_unit_type_data:
                 for exercise_unit_data in exercise_unit_type_data:
                     new_exercise_unit_type = Exercise_Unit(**exercise_unit_data)
@@ -287,11 +277,10 @@ def populate_exercise_unit(exercise_unit_type_data, db = db):
         logging.warning(e)
 
 
-
-def populate_goal_type(goal_types, db = db):
+def populate_goal_type(goal_types, db=db):
     try:
         goal_type_query = db.query(Goal_Type).first()
-        if goal_type_query is None:  
+        if goal_type_query is None:
             if goal_types:
                 for goal_type in goal_types:
                     new_goal_type = Goal_Type(**goal_type)
@@ -301,13 +290,11 @@ def populate_goal_type(goal_types, db = db):
         logging.warning(e)
 
 
-
 def populate_database():
     populate_exercise_type(exercise_type_data)
-    populate_exercise_unit(exercise_unit_types) 
+    populate_exercise_unit(exercise_unit_types)
     populate_goal_type(goal_types)
     populate_exercise(exercises_data)
-
 
 
 populate_database()

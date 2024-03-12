@@ -2,14 +2,17 @@
 from datetime import timedelta, datetime
 from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
+
 # Basemodel For Validation of the user
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+
 # Status for Returning correct status code back to the user
 from starlette import status
 from database import SessionLocal
 from models import User
 from passlib.context import CryptContext
+
 # Form To Pass 2 Password auth
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from jose import jwt, JWTError
@@ -18,28 +21,24 @@ from jose import jwt, JWTError
 import logging
 
 
-auth = APIRouter(
-    prefix='/auth',
-    tags=['auth']
-)
+auth = APIRouter(prefix="/auth", tags=["auth"])
 
 
 # Using Them in bottom section
-SECRET_KEY = 'ASDHHMKLdfeyuol2312478msasdasdgaSADDEWGfh5478dsfwasd'
+SECRET_KEY = "ASDHHMKLdfeyuol2312478msasdasdgaSADDEWGfh5478dsfwasd"
 # Using Standard algorithm HS256
-ALGORITHM = 'HS256'
+ALGORITHM = "HS256"
 
 
 # Password Hashing and Unhashing
-bcrypt_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
-oauth2_bearer = OAuth2PasswordBearer(tokenUrl='auth/token')
-
+bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+oauth2_bearer = OAuth2PasswordBearer(tokenUrl="auth/token")
 
 
 # Data Validation
 class CreateUserRequest(BaseModel):
     username: str
-    fullname : str
+    fullname: str
     password: str
     weight: int
     height: int
@@ -52,6 +51,7 @@ class Token(BaseModel):
 
 # Dependency For Database
 
+
 def get_db():
     db = SessionLocal()
     try:
@@ -63,91 +63,100 @@ def get_db():
 db_dependency = Annotated[Session, Depends(get_db)]
 
 
-
 # Creating User Model
 @auth.post("/register", status_code=status.HTTP_201_CREATED)
-async def create_user(db: db_dependency,
-                      create_user_request: CreateUserRequest): # Passing CreateUserRequest for field Validation
+async def create_user(
+    db: db_dependency, create_user_request: CreateUserRequest
+):  # Passing CreateUserRequest for field Validation
 
     create_user_model = User(
-        username = create_user_request.username,
-        fullname = create_user_request.fullname,
-        hashed_password = bcrypt_context.hash(
+        username=create_user_request.username,
+        fullname=create_user_request.fullname,
+        hashed_password=bcrypt_context.hash(
             create_user_request.password
-            ), # Hashing Password To hs256 algorithm
-        weight = create_user_request.weight,
-        height = create_user_request.height
+        ),  # Hashing Password To hs256 algorithm
+        weight=create_user_request.weight,
+        height=create_user_request.height,
     )
 
-    #Commiting Db Additions
+    # Commiting Db Additions
     try:
         db.add(create_user_model)
-        db.commit() 
+        db.commit()
         return {"User": "Created Succesfully"}
     except:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT,
-                            detail="Username Already Exists \ Taken")
-
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Username Already Exists \ Taken",
+        )
 
 
 # authentificating users using custom made function that queries user
 @auth.post("/token", response_model=Token)
 async def login_for_access_token(
-form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-db: db_dependency):
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: db_dependency
+):
     # authenticate_user is a function that verifies the user's data
     # it also decrypts bcrypted/hashed password
     user = authenticate_user(form_data.username, form_data.password, db)
     if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                            detail='Could not validate user.')
-    token = create_access_token(user.username, user.user_id, timedelta(minutes=60)) # Time For Token To be alive
-    return {'access_token': token, 'token_type': 'bearer'}  # Returning a dictionary
-
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate user."
+        )
+    token = create_access_token(
+        user.username, user.user_id, timedelta(minutes=60)
+    )  # Time For Token To be alive
+    return {"access_token": token, "token_type": "bearer"}  # Returning a dictionary
 
 
 # custom made function that queries user
 def authenticate_user(username: str, password: str, db):
-    #Quering User By Unique Username
+    # Quering User By Unique Username
     user = db.query(User).filter(User.username == username).first()
     if not user:
         return HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail='Could not find specified username.')
-    #Checking Decrypted password with .verify
+            detail="Could not find specified username.",
+        )
+    # Checking Decrypted password with .verify
     if not bcrypt_context.verify(password, user.hashed_password):
         return HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail='Password is not Bcrypted.')
+            detail="Password is not Bcrypted.",
+        )
     return user
 
 
-#JWT Encoding
+# JWT Encoding
 def create_access_token(username: str, user_id: int, expires_delta: timedelta):
     try:
         encode = {"sub": username, "id": user_id}
         expires = datetime.utcnow() + expires_delta
-        encode.update({'exp': expires})
+        encode.update({"exp": expires})
         return jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)
     except JWTError:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                                detail='Cant Encode The request.')
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Cant Encode The request."
+        )
 
 
-#JWT Decoding
+# JWT Decoding
 async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]):
     try:
         # If Decoded Fails, We raise an exception down below
         decode = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
 
         # Decoding username and user_id
-        username: str = decode.get('sub')
-        user_id: int = decode.get('id')
+        username: str = decode.get("sub")
+        user_id: int = decode.get("id")
         # Checking For username to not be none / user_id to not be none
         if username is None or user_id is None:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                                detail='Could not validate user.')
-        return {'username': username, 'id': user_id}
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Could not validate user.",
+            )
+        return {"username": username, "id": user_id}
     except JWTError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                                detail='Could not validate user.')
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate user."
+        )

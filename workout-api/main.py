@@ -5,8 +5,6 @@ import auth
 import routes
 
 
-
-
 # Creating FastAPI instance
 app = FastAPI()
 
@@ -15,5 +13,3 @@ app.include_router(auth.auth)
 app.include_router(routes.router)
 
 Base.metadata.create_all(bind=engine)
-
-
