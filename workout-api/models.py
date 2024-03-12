@@ -40,6 +40,7 @@ class Goal(Base):
     completed = Column(Boolean, default=False)
     goal_type_id = Column(Integer, ForeignKey('goal_types.goal_type_id'))
     goal_type = relationship("Goal_Type", back_populates="goal")
+    schedule = relationship("Schedule", back_populates='goal')
 
 # PBeing Populated From Seed
 class Goal_Type(Base):
@@ -91,6 +92,7 @@ class Schedule(Base):
     __tablename__ = "schedules"
 
     schedule_id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey('users.user_id'))
     goal_id = Column(Integer, ForeignKey('goals.goal_id') ,nullable=True)
     start_date = Column(DateTime, nullable=True)
     end_date = Column(DateTime, nullable=True)
@@ -98,7 +100,7 @@ class Schedule(Base):
     note = Column(String, default="")
     extended_note = Column(String, default="")
     crontab_value = Column(String, default="")
-
+    goal = relationship("Goal", back_populates='schedule')
 
 class User_History(Base):
     __tablename__ = "user_history"
@@ -106,6 +108,7 @@ class User_History(Base):
     history_id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey('users.user_id'))
     created = Column(DateTime, default=datetime.utcnow)
+    fullname_change = Column(String, nullable=True)
     weight_change = Column(Integer, nullable=True)
     height_change = Column(Integer, nullable=True)
     bmi_calculation = Column(Integer, nullable=True)

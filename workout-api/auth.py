@@ -18,7 +18,7 @@ from jose import jwt, JWTError
 import logging
 
 
-router = APIRouter(
+auth = APIRouter(
     prefix='/auth',
     tags=['auth']
 )
@@ -65,7 +65,7 @@ db_dependency = Annotated[Session, Depends(get_db)]
 
 
 # Creating User Model
-@router.post("/register", status_code=status.HTTP_201_CREATED)
+@auth.post("/register", status_code=status.HTTP_201_CREATED)
 async def create_user(db: db_dependency,
                       create_user_request: CreateUserRequest): # Passing CreateUserRequest for field Validation
 
@@ -91,7 +91,7 @@ async def create_user(db: db_dependency,
 
 
 # authentificating users using custom made function that queries user
-@router.post("/token", response_model=Token)
+@auth.post("/token", response_model=Token)
 async def login_for_access_token(
 form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
 db: db_dependency):
