@@ -1,23 +1,29 @@
+# Workout Application API
+
+## Overview
+
 This API powers a workout application designed to empower users to achieve their fitness goals.
 It offers a secure authentication system, personalized goal tracking, customizable schedule creation,
 weight tracking, and a library of preset exercises.
 
-API Is Created With Python FastAPI
-Database: PostgreSQL
-Database Management Application: PGadmin4 Accessable at Port `5050`
+## Technologies Used
 
-**Installation Steps:**
+- Python FastAPI
+- PostgreSQL
+- PGadmin4 -- Accessable at Port `5050`
 
-- Requires Docker and docker compose
-- Provided requirements.txt has every Python dependency needed
-- Navigate to project folder and run: `docker compose up --build`
+## Installation
 
-**FastAPI Documentation Routes**
+1. Ensure Docker and Docker Compose are installed on your machine.
+2. Clone the repository and navigate to the project folder.
+3. Run the following command to build and start the Docker containers: `docker compose up --build`
 
-- Docs `/docs`
-- Redocs `/redocs`
+## FastAPI Documentation
 
-**API Endpoints (Examples):**
+- Swagger Docs `/docs`
+- Swagger Redocs `/redocs`
+
+## API Endpoints
 
 - Create User (POST):`/auth/register`
 - Login/Token access (POST): `/auth/token`
@@ -45,3 +51,7 @@ Database Management Application: PGadmin4 Accessable at Port `5050`
 - BMI History Addition, gets current user and adds bmi to history,
   needs specifying bmi value (POST): `/history/add_bmi_history/{bmi_value}`
 - Delete Authenticated User History By ID (DELETE): `/history/{history_id}`
+
+## Contact
+
+Mail: guro.sivs@gmail.com

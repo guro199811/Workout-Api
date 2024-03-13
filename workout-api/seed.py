@@ -11,14 +11,14 @@ exercise_type_data = [
     {"exercise_type_name": "Endurence"},
     {"exercise_type_name": "Strength"},
     {"exercise_type_name": "Balance"},
-    {"exercise_type_name": "Flexibility"},
+    {"exercise_type_name": "Flexibility"}
 ]
 
 
 # Exercise unit types for unit management
 exercise_unit_types = [
     {"unit_1": "Km", "unit_2": "M"},
-    {"unit_1": "Sets", "unit_2": "Reps"},
+    {"unit_1": "Sets", "unit_2": "Reps"}
 ]
 
 
@@ -27,7 +27,7 @@ goal_types = [
     {"goal_target": "Weight"},
     {"goal_target": "Distance"},
     {"goal_target": "Speed"},
-    {"goal_target": "Strength"},
+    {"goal_target": "Strength"}
 ]
 
 
@@ -232,7 +232,7 @@ exercises_data = [
         "exercise_type_id": 4,
         "unit_type_id": 2,
         "goal_type_id": 1,
-    },
+    }
 ]
 
 
