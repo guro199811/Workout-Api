@@ -31,7 +31,8 @@ class Exercise(Base):
     instructions = Column(String)
     target_muscles = Column(String)
     difficulty = Column(String)
-    exercise_type_id = Column(Integer, ForeignKey("exercise_types.exercise_type_id"))
+    exercise_type_id = Column(Integer, ForeignKey(
+        "exercise_types.exercise_type_id"))
     exercise_type = relationship("Exercise_Type", back_populates="exercises")
     unit_type_id = Column(Integer, ForeignKey("exercise_units.unit_id"))
     goal_type_id = Column(Integer, ForeignKey("goal_types.goal_type_id"))

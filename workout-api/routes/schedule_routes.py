@@ -1,9 +1,9 @@
 from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
+from .auth import get_current_user
 
 
-from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import asc
+from sqlalchemy.orm import Session
 from starlette import status
 from database import SessionLocal
 
@@ -14,8 +14,6 @@ import logging
 from models import (
     User,
     Goal,
-    Exercise,
-    Exercise_Type,
     Schedule,
 )
 
@@ -31,7 +29,6 @@ def get_db():
 
 
 db_dependency = Annotated[Session, Depends(get_db)]
-from .auth import get_current_user
 
 # user_dependency will act as login_required
 user_dependency = Annotated[dict, Depends(get_current_user)]
@@ -43,7 +40,8 @@ schedule = APIRouter(prefix="/schedule", tags=["schedules"])
 
 
 @schedule.post(
-    "/create_schedule", description="This endpoint creates a user related schedule"
+    "/create_schedule",
+    description="This endpoint creates a user related schedule"
 )
 def create_schedule(
     user: user_dependency, db: db_dependency, schedule: ScheduleRequestModel
@@ -88,12 +86,14 @@ def create_schedule(
         return {"Request Succesful": "Schedule entry has been added"}
 
     except Exception as e:
-        logging.error(f"Exception raised at create_schedule(post) function: {e}")
+        logging.error(
+            f"Exception raised at create_schedule(post) function: {e}")
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @schedule.get(
-    "/user_schedules/", description="This endpoint querries user related schedules"
+    "/user_schedules/",
+    description="This endpoint querries user related schedules"
 )
 def get_personal_schedules(user: user_dependency, db: db_dependency):
     schedules = db.query(Schedule).filter(Schedule.user_id == user["id"]).all()
@@ -106,10 +106,12 @@ def get_personal_schedules(user: user_dependency, db: db_dependency):
     schedules_dict = []
     for schedule in schedules:
         if schedule.goal_id:
-            goal = db.query(Goal).filter(Goal.goal_id == schedule.goal_id).first()
+            goal = db.query(Goal).filter(
+                Goal.goal_id == schedule.goal_id).first()
             if goal:
                 selected_exercises = list(
-                    set(goal.selected_exercises).union(schedule.selected_exercises)
+                    set(goal.selected_exercises).union(
+                        schedule.selected_exercises)
                 )
             else:
                 selected_exercises = schedule.selected_exercises
@@ -146,15 +148,13 @@ def edit_personal_schedule(
     # Querying Schedule with user_id and specified schedule_id
     db_schedule = (
         db.query(Schedule)
-        .filter(Schedule.user_id == user["id"], Schedule.schedule_id == schedule_id)
+        .filter(Schedule.user_id == user["id"],
+                Schedule.schedule_id == schedule_id)
         .first()
     )
 
     if not db_schedule:
         raise HTTPException(status_code=404, detail="Schedule not found")
-
-    # we need user query for add_history function
-    user_db = db.query(User).filter(User.user_id == user["id"]).first()
 
     if schedule.goal_id:
         goal = db.query(Goal).filter(Goal.goal_id == schedule.goal_id).first()
@@ -174,7 +174,8 @@ def edit_personal_schedule(
         db.refresh(db_schedule)
         return db_schedule
     except Exception as e:
-        logging.error(f"Exception raised at edit_personal_schedule(put) function: {e}")
+        logging.error(
+            f"Exception raised at edit_personal_schedule(put) function: {e}")
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -187,7 +188,8 @@ def delete_personal_schedule(
 ):
     schedule = (
         db.query(Schedule)
-        .filter(Schedule.user_id == user["id"], Schedule.schedule_id == schedule_id)
+        .filter(Schedule.user_id == user["id"],
+                Schedule.schedule_id == schedule_id)
         .first()
     )
 
@@ -200,6 +202,6 @@ def delete_personal_schedule(
         return {"message": "Goal successfully deleted"}
     except Exception as e:
         logging.error(
-            f"Exception raised at delete_personal_schedule(delete) function: {e}"
+            f"Exception raised at delete schedule(delete) function: {e}"
         )
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)

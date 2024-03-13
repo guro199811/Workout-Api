@@ -1,9 +1,7 @@
 from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 
-from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import asc
-
+from sqlalchemy.orm import Session
 
 from starlette import status
 from database import SessionLocal
@@ -11,6 +9,7 @@ from database import SessionLocal
 # For Debugging
 import logging
 
+from .auth import get_current_user
 from models import (
     User,
     Goal,
@@ -18,6 +17,7 @@ from models import (
     Exercise,
     Exercise_Unit,
 )
+
 
 from form_models import GoalRequestModel
 
@@ -31,7 +31,6 @@ def get_db():
 
 
 db_dependency = Annotated[Session, Depends(get_db)]
-from .auth import get_current_user
 
 # user_dependency will act as login_required
 user_dependency = Annotated[dict, Depends(get_current_user)]
@@ -42,7 +41,8 @@ goal = APIRouter(prefix="/goal", tags=["goals"])
 
 
 # Querries all Goal types
-@goal.get("/all_goal_types/", description="This endpoint returns all available goal_types.")
+@goal.get("/all_goal_types/",
+          description="This endpoint returns all available goal_types.")
 def all_goal_types(db: db_dependency):
     goal_types = db.query(Goal_Type).all()
     if not goal_types:
@@ -53,7 +53,8 @@ def all_goal_types(db: db_dependency):
 
 
 @goal.post("/create_goal/", description="This endpoint is for goal creation")
-def create_goal(user: user_dependency, db: db_dependency, goal: GoalRequestModel):
+def create_goal(user: user_dependency, db: db_dependency,
+                goal: GoalRequestModel):
     # Getting current user
     user = db.query(User).filter(User.user_id == user["id"]).first()
     if not user:
@@ -62,7 +63,8 @@ def create_goal(user: user_dependency, db: db_dependency, goal: GoalRequestModel
         )
     # Checking for goaltypes existance
     goal_type = (
-        db.query(Goal_Type).filter(Goal_Type.goal_type_id == goal.goal_type_id).first()
+        db.query(Goal_Type).filter(
+            Goal_Type.goal_type_id == goal.goal_type_id).first()
     )
     if not goal_type:
         raise HTTPException(
@@ -92,7 +94,8 @@ def create_goal(user: user_dependency, db: db_dependency, goal: GoalRequestModel
 
 
 # get user goals
-@goal.get("/personal_goals/", description="This endpoint returns user related goals.")
+@goal.get("/personal_goals/",
+          description="This endpoint returns user related goals.")
 def get_personal_goals(user: user_dependency, db: db_dependency):
     user_goals = (
         db.query(Goal)
@@ -103,7 +106,8 @@ def get_personal_goals(user: user_dependency, db: db_dependency):
     )
     if not user_goals:
         raise HTTPException(
-            status.HTTP_404_NOT_FOUND, detail="Goals not found on this specific user"
+            status.HTTP_404_NOT_FOUND,
+            detail="Goals not found on this specific user"
         )
 
     user_goals_dict = []
@@ -165,9 +169,11 @@ def get_personal_goals(user: user_dependency, db: db_dependency):
 
 
 # Editability forr personal goals
-@goal.put("/personal_goals/{goal_id}", description="This endpoint edits user related goal.")
+@goal.put("/personal_goals/{goal_id}",
+          description="This endpoint edits user related goal.")
 def edit_personal_goal(
-    user: user_dependency, goal: GoalRequestModel, goal_id: int, db: db_dependency
+    user: user_dependency, goal: GoalRequestModel, goal_id: int,
+    db: db_dependency
 ):
     # Querying Goal with user_id and specified goal_id
     db_goal = (
@@ -186,7 +192,8 @@ def edit_personal_goal(
             .first()
         )
         if not goal_type:
-            raise HTTPException(status_code=404, detail="Specific Goal type not found")
+            raise HTTPException(status_code=404,
+                                detail="Specific Goal type not found")
         db_goal.goal_type_id = goal_type.goal_type_id
 
     changes = goal.dict()  # Request model can be dictionarized
@@ -201,13 +208,16 @@ def edit_personal_goal(
         db.refresh(db_goal)
         return db_goal
     except Exception as e:
-        logging.error(f"Exception Raised at edit_personal_goal(put) function: {e}")
+        logging.error(
+            f"Exception Raised at edit_personal_goal(put) function: {e}")
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 # Deletability for personal goals
-@goal.delete("/personal_goals/{goal_id}", description="This endpoint deletes user related goal.")
-def delete_personal_goal(user: user_dependency, goal_id: int, db: db_dependency):
+@goal.delete("/personal_goals/{goal_id}",
+             description="This endpoint deletes user related goal.")
+def delete_personal_goal(user: user_dependency, goal_id: int,
+                         db: db_dependency):
     db_goal = (
         db.query(Goal)
         .filter(Goal.user_id == user["id"], Goal.goal_id == goal_id)
@@ -221,5 +231,5 @@ def delete_personal_goal(user: user_dependency, goal_id: int, db: db_dependency)
         db.commit()
         return {"message": "Goal successfully deleted"}
     except Exception as e:
-        logging.error(f"Exception Raised at delete_personal_goal(delete) function: {e}")
+        logging.error(f"Exception Raised at delete goal function: {e}")
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -1,7 +1,7 @@
 # Datetime is for Expiration of JWT
 from datetime import timedelta, datetime
 from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 
 from sqlalchemy.orm import Session
 from starlette import status
@@ -65,7 +65,7 @@ async def create_user(
         hashed_password=bcrypt_context.hash(create_user_request.password),
         weight=create_user_request.weight,
         height=create_user_request.height,
-        active = create_user_request.active
+        active=create_user_request.active,
     )
 
     # Commiting Db Additions
@@ -74,10 +74,10 @@ async def create_user(
         db.commit()
         return {"User": "Created Succesfully"}
     except Exception as e:
-        logging.error(f'in auth.create_user, exception: {e}')
+        logging.error(f"in auth.create_user, exception: {e}")
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="Username Already Exists \ Taken",
+            detail="Username Already Exists / Taken",
         )
 
 
@@ -87,19 +87,21 @@ async def create_user(
     description="Returns token, which is used to authenticate user",
 )
 async def login_for_access_token(
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: db_dependency
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    db: db_dependency
 ):
     # authenticate_user is a function that verifies the user's data
     # it also decrypts bcrypted/hashed password
     user = authenticate_user(form_data.username, form_data.password, db)
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate user."
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate user."
         )
     token = create_access_token(
         user.username, user.user_id, timedelta(minutes=60)
     )  # Time For Token To be alive
-    return {"access_token": token, "token_type": "bearer"}  # Returning a dictionary
+    return {"access_token": token, "token_type": "bearer"}
 
 
 def authenticate_user(username: str, password: str, db):
@@ -127,9 +129,10 @@ def create_access_token(username: str, user_id: int, expires_delta: timedelta):
         encode.update({"exp": expires})
         return jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)
     except JWTError:
-        logging.error(f'in auth.create_access_token exception: {JWTError}')
+        logging.error(f"in auth.create_access_token exception: {JWTError}")
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Cant Encode The request."
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cant Encode The request."
         )
 
 
@@ -148,7 +151,8 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]):
             )
         return {"username": username, "id": user_id}
     except JWTError:
-        logging.error(f'in auth.create_access_token exception: {JWTError}')
+        logging.error(f"in auth.create_access_token exception: {JWTError}")
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate user."
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate user."
         )
