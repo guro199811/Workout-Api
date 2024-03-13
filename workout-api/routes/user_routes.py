@@ -50,7 +50,7 @@ def user_data(user: user_dependency, db: db_dependency):
     }
 
 
-@user_route.put("/user_data_change", description='This endpoint edits current user data')
+@user_route.put("/data_change", description='This endpoint edits current user data')
 def change_user_data(
     user: user_dependency, db: db_dependency, user_request: ChangeUserDataRequest
 ):
