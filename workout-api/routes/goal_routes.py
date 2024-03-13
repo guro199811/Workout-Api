@@ -41,39 +41,8 @@ user_dependency = Annotated[dict, Depends(get_current_user)]
 goal = APIRouter(prefix="/goal", tags=["goals"])
 
 
-@goal.get("/user/create_goal/")
-def get_goal_data(user: user_dependency, db: db_dependency):
-    exercises = (
-        db.query(Exercise)
-        .join(Goal_Type)
-        .options(joinedload(Exercise.exercise_type))
-        .order_by(asc(Goal_Type.goal_type_id))
-        .all()
-    )
-    if not exercises:
-        raise HTTPException(
-            status.HTTP_404_NOT_FOUND, detail="Exercises were not found"
-        )
-
-    return {
-        "exercises": [
-            dict(
-                goal_target=exercise.goal_type.goal_target,
-                exercise_id=exercise.exercise_id,
-                exercise_name=exercise.exercise_name,
-                description=exercise.description,
-                instructions=exercise.instructions,
-                target_muscles=exercise.target_muscles,
-                difficulty=exercise.difficulty,
-                goal_type_id=exercise.goal_type_id,
-            )
-            for exercise in exercises
-        ]
-    }
-
-
 # Querries all Goal types
-@goal.get("/all_goal_types/")
+@goal.get("/all_goal_types/", description="This endpoint returns all available goal_types.")
 def all_goal_types(db: db_dependency):
     goal_types = db.query(Goal_Type).all()
     if not goal_types:

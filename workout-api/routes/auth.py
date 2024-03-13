@@ -58,9 +58,7 @@ async def create_user(
     create_user_model = User(
         username=create_user_request.username,
         fullname=create_user_request.fullname,
-        hashed_password=bcrypt_context.hash(
-            create_user_request.password
-        ),  # Hashing Password To hs256 algorithm
+        hashed_password=bcrypt_context.hash(create_user_request.password),
         weight=create_user_request.weight,
         height=create_user_request.height,
     )

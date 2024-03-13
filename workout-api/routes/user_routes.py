@@ -27,7 +27,7 @@ from .auth import get_current_user
 # user_dependency will act as login_required
 user_dependency = Annotated[dict, Depends(get_current_user)]
 
-from .history import add_history
+from .history_routes import add_history
 
 
 # For user management
