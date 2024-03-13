@@ -1,11 +1,11 @@
 from fastapi import FastAPI
 from database import engine, Base
+from seed import populate_database
 
 from routes import (
     auth, exercise, goal,
     history, schedule, user
 )
-import time
 
 
 
@@ -24,9 +24,5 @@ app.include_router(history.hist)
 
 Base.metadata.create_all(bind=engine)
 
-def populate_db():
-    time.sleep(3)
-    from seed import populate_database
-    populate_database()
 
-populate_db()
+populate_database()

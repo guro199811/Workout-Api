@@ -297,4 +297,3 @@ def populate_database():
     populate_exercise(exercises_data)
 
 
-populate_database()
