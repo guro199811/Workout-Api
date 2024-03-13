@@ -1,3 +1,3 @@
-from .base_models import (GoalRequestModel, ChangeUserDataRequest,
+from .request_models import (GoalRequestModel, ChangeUserDataRequest,
                   ScheduleRequestModel, ChangeUserDataRequest,
                   CreateUserRequest, Token)
