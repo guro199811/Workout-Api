@@ -1,16 +1,14 @@
+from .auth import get_current_user
+from .history_routes import add_history
 from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from starlette import status
 from database import SessionLocal
-
-
-# For Debugging
 import logging
 
 from models import User
-
-from form_models import ChangeUserDataRequest, ChangeUserDataRequest
+from form_models import ChangeUserDataRequest
 
 
 def get_db():
@@ -22,12 +20,10 @@ def get_db():
 
 
 db_dependency = Annotated[Session, Depends(get_db)]
-from .auth import get_current_user
+
 
 # user_dependency will act as login_required
 user_dependency = Annotated[dict, Depends(get_current_user)]
-
-from .history_routes import add_history
 
 
 # For user management
@@ -35,7 +31,11 @@ from .history_routes import add_history
 user_route = APIRouter(prefix="/user", tags=["user"])
 
 
-@user_route.get("/", status_code=status.HTTP_200_OK, description='This endpoint Gets current user data')
+@user_route.get(
+    "/",
+    status_code=status.HTTP_200_OK,
+    description="This endpoint Gets current user data",
+)
 def user_data(user: user_dependency, db: db_dependency):
     user_db = db.query(User).filter(User.user_id == user["id"]).first()
     if user_db is None:
@@ -50,9 +50,13 @@ def user_data(user: user_dependency, db: db_dependency):
     }
 
 
-@user_route.put("/data_change", description='This endpoint edits current user data')
+@user_route.put(
+        "/data_change",
+        description="This endpoint edits current user data"
+        )
 def change_user_data(
-    user: user_dependency, db: db_dependency, user_request: ChangeUserDataRequest
+    user: user_dependency, db: db_dependency,
+    user_request: ChangeUserDataRequest
 ):
     user = db.query(User).filter(User.user_id == user["id"]).first()
     if not user:
@@ -92,5 +96,7 @@ def change_user_data(
         return {"Request Successfull": "User Data has been changed"}
     except Exception as e:
         db.rollback()
-        logging.error(f"Exception raised at change_user_data(put) function: {e}")
+        logging.error(
+            f"Exception raised at change_user_data(put) function: {e}"
+            )
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)

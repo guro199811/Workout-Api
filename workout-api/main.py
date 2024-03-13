@@ -8,8 +8,6 @@ from routes import (
 )
 
 
-
-# Creating FastAPI instance
 app = FastAPI()
 
 # Adding Auth Router
@@ -19,7 +17,6 @@ app.include_router(exercise_routes.exercise)
 app.include_router(goal_routes.goal)
 app.include_router(schedule_routes.schedule)
 app.include_router(history_routes.hist)
-
 
 
 Base.metadata.create_all(bind=engine)

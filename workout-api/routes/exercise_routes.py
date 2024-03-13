@@ -1,14 +1,11 @@
 from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import asc
 from starlette import status
+
 from database import SessionLocal
-
-
-# For Debugging
-import logging
-
+from .auth import get_current_user
 from models import Exercise, Exercise_Type, Exercise_Unit, Goal_Type
 
 
@@ -21,7 +18,7 @@ def get_db():
 
 
 db_dependency = Annotated[Session, Depends(get_db)]
-from .auth import get_current_user
+
 
 # user_dependency will act as login_required
 user_dependency = Annotated[dict, Depends(get_current_user)]
@@ -109,10 +106,12 @@ def exercises_by_goal_type(db: db_dependency):
     description="This endpoint returns exercises filtered by exercise_id.",
 )
 def get_exercise_by_id(exercise_id: int, db: db_dependency):
-    exercise = db.query(Exercise).filter(Exercise.exercise_id == exercise_id).first()
+    exercise = db.query(Exercise).filter(
+        Exercise.exercise_id == exercise_id).first()
     if not exercise:
         raise HTTPException(
-            status.HTTP_404_NOT_FOUND, detail="Exercise not found by exercise_id"
+            status.HTTP_404_NOT_FOUND,
+            detail="Exercise not found by exercise_id"
         )
     return {"exercises": exercise}
 
@@ -126,7 +125,8 @@ def all_exercise_types(db: db_dependency):
     exercise_types = db.query(Exercise_Type).all()
     if not exercise_types:
         raise HTTPException(
-            status.HTTP_404_NOT_FOUND, detail="Exercise types are not populated"
+            status.HTTP_404_NOT_FOUND,
+            detail="Exercise types are not populated"
         )
     return {"exercise_types": exercise_types}
 
@@ -140,6 +140,7 @@ def all_exercise_units(db: db_dependency):
     exercise_units = db.query(Exercise_Unit).all()
     if not exercise_units:
         raise HTTPException(
-            status.HTTP_404_NOT_FOUND, detail="Exercise units are not populated"
+            status.HTTP_404_NOT_FOUND,
+            detail="Exercise units are not populated"
         )
     return {"exercise_units": exercise_units}

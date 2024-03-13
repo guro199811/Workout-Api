@@ -246,7 +246,8 @@ def populate_exercise(exercise_data, db=db):
                     db.add(new_exercise)
 
             db.commit()
-    except:
+    except Exception as e:
+        logging.error(e)
         db.rollback()
 
 
@@ -270,7 +271,8 @@ def populate_exercise_unit(exercise_unit_type_data, db=db):
         if exercise_unit_type is None:
             if exercise_unit_type_data:
                 for exercise_unit_data in exercise_unit_type_data:
-                    new_exercise_unit_type = Exercise_Unit(**exercise_unit_data)
+                    new_exercise_unit_type = Exercise_Unit(
+                        **exercise_unit_data)
                     db.add(new_exercise_unit_type)
             db.commit()
     except Exception as e:

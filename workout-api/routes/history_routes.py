@@ -1,12 +1,11 @@
 from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from starlette import status
 from database import SessionLocal
-
-# For Debugging
 import logging
 
+from .auth import get_current_user
 from models import User, User_History
 
 
@@ -19,7 +18,6 @@ def get_db():
 
 
 db_dependency = Annotated[Session, Depends(get_db)]
-from .auth import get_current_user
 
 # user_dependency will act as login_required
 user_dependency = Annotated[dict, Depends(get_current_user)]
@@ -80,16 +78,22 @@ def add_history(
         logging.error(f"Exception raised at add_history function: {e}")
 
 
-@hist.post("/add_bmi_history/{bmi_value}", description="Endpoint and adds history of bmi.")
-def bmi_history_addition(user: user_dependency, db: db_dependency, bmi_value: int):
+@hist.post("/add_bmi_history/{bmi_value}",
+           description="Endpoint and adds history of bmi.")
+def bmi_history_addition(user: user_dependency,
+                         db: db_dependency, bmi_value: int):
     user_db = db.query(User).filter(User.user_id == user["id"]).first()
     add_history(db, user_db, bmi_calculation=bmi_value)
     return {"message": "Bmi History Added"}
 
-@hist.delete("/{history_id}", description='This endpoint removes user history by history_id')
-def delete_user_history(user: user_dependency, db: db_dependency, history_id: int):
+
+@hist.delete("/{history_id}",
+             description='This endpoint removes user history by history_id')
+def delete_user_history(user: user_dependency,
+                        db: db_dependency, history_id: int):
     history = db.query(User_History).filter(
-        User_History.user_id == user["id"], User_History.history_id == history_id
+        User_History.user_id == user["id"],
+        User_History.history_id == history_id
     ).first()
 
     if not history:
@@ -99,7 +103,7 @@ def delete_user_history(user: user_dependency, db: db_dependency, history_id: in
         db.delete(history)
         db.commit()
     except Exception as e:
-        logging.error(f"Exception raised at delete_user_history(delete) function: {e}")
+        logging.error(f"Exception raised at delete history function: {e}")
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     return {"message": "History Successfully deleted"}
