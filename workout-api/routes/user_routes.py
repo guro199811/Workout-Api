@@ -35,7 +35,7 @@ from .history_routes import add_history
 user_route = APIRouter(prefix="/user", tags=["user"])
 
 
-@user_route.get("/", status_code=status.HTTP_200_OK)
+@user_route.get("/", status_code=status.HTTP_200_OK, description='This endpoint Gets current user data')
 def user_data(user: user_dependency, db: db_dependency):
     user_db = db.query(User).filter(User.user_id == user["id"]).first()
     if user_db is None:
@@ -50,7 +50,7 @@ def user_data(user: user_dependency, db: db_dependency):
     }
 
 
-@user_route.put("/user_data_change")
+@user_route.put("/user_data_change", description='This endpoint edits current user data')
 def change_user_data(
     user: user_dependency, db: db_dependency, user_request: ChangeUserDataRequest
 ):

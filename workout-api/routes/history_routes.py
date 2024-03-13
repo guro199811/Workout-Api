@@ -30,7 +30,7 @@ user_dependency = Annotated[dict, Depends(get_current_user)]
 hist = APIRouter(prefix="/history", tags=["history"])
 
 
-@hist.get("/")
+@hist.get("/", description="This endpoint returns user related histories.")
 def get_user_history(user: user_dependency, db: db_dependency):
     user_histories = (
         db.query(User_History).filter(User_History.user_id == user["id"]).all()
@@ -80,13 +80,13 @@ def add_history(
         logging.error(f"Exception raised at add_history function: {e}")
 
 
-@hist.post("/add_bmi_history/{bmi_value}")
+@hist.post("/add_bmi_history/{bmi_value}", description="Endpoint and adds history of bmi.")
 def bmi_history_addition(user: user_dependency, db: db_dependency, bmi_value: int):
     user_db = db.query(User).filter(User.user_id == user["id"]).first()
     add_history(db, user_db, bmi_calculation=bmi_value)
 
 
-@hist.delete("/{history_id}")
+@hist.delete("/{history_id}", description='This endpoint removes user history by history_id')
 def delete_user_history(user: user_dependency, db: db_dependency, history_id: int):
     history = db.query(User_History).filter(
         User_History.user_id == user["id"], User_History.history_id == history_id

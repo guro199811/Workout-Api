@@ -52,7 +52,7 @@ def all_goal_types(db: db_dependency):
     return {"goal_types": goal_types}
 
 
-@goal.post("/create_goal/")
+@goal.post("/create_goal/", description="This endpoint is for goal creation")
 def create_goal(user: user_dependency, db: db_dependency, goal: GoalRequestModel):
     # Getting current user
     user = db.query(User).filter(User.user_id == user["id"]).first()
@@ -92,7 +92,7 @@ def create_goal(user: user_dependency, db: db_dependency, goal: GoalRequestModel
 
 
 # get user goals
-@goal.get("/personal_goals/")
+@goal.get("/personal_goals/", description="This endpoint returns user related goals.")
 def get_personal_goals(user: user_dependency, db: db_dependency):
     user_goals = (
         db.query(Goal)
@@ -165,7 +165,7 @@ def get_personal_goals(user: user_dependency, db: db_dependency):
 
 
 # Editability forr personal goals
-@goal.put("/personal_goals/{goal_id}")
+@goal.put("/personal_goals/{goal_id}", description="This endpoint edits user related goal.")
 def edit_personal_goal(
     user: user_dependency, goal: GoalRequestModel, goal_id: int, db: db_dependency
 ):
@@ -206,7 +206,7 @@ def edit_personal_goal(
 
 
 # Deletability for personal goals
-@goal.delete("/personal_goals/{goal_id}")
+@goal.delete("/personal_goals/{goal_id}", description="This endpoint deletes user related goal.")
 def delete_personal_goal(user: user_dependency, goal_id: int, db: db_dependency):
     db_goal = (
         db.query(Goal)

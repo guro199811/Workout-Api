@@ -50,7 +50,11 @@ oauth2_bearer = OAuth2PasswordBearer(tokenUrl="auth/token")
 
 
 # Creating User Model
-@auth.post("/register", status_code=status.HTTP_201_CREATED)
+@auth.post(
+    "/register",
+    status_code=status.HTTP_201_CREATED,
+    description="Endpoint for user creation/registration",
+)
 async def create_user(
     db: db_dependency, create_user_request: CreateUserRequest
 ):  # Passing CreateUserRequest for field Validation
@@ -75,8 +79,11 @@ async def create_user(
         )
 
 
-# authentificating users using custom made function that queries user
-@auth.post("/token", response_model=Token)
+@auth.post(
+    "/token",
+    response_model=Token,
+    description="Returns token, which is used to authenticate user",
+)
 async def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: db_dependency
 ):
@@ -93,7 +100,6 @@ async def login_for_access_token(
     return {"access_token": token, "token_type": "bearer"}  # Returning a dictionary
 
 
-# custom made function that queries user
 def authenticate_user(username: str, password: str, db):
     # Quering User By Unique Username
     user = db.query(User).filter(User.username == username).first()
@@ -127,10 +133,8 @@ def create_access_token(username: str, user_id: int, expires_delta: timedelta):
 # JWT Decoding
 async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]):
     try:
-        # If Decoded Fails, We raise an exception down below
+        # If Decode Fails, We raise an exception
         decode = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-
-        # Decoding username and user_id
         username: str = decode.get("sub")
         user_id: int = decode.get("id")
         # Checking For username to not be none / user_id to not be none

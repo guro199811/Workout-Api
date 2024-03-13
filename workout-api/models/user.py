@@ -16,10 +16,10 @@ class User(Base):
 
     user_id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True, nullable=False)
-    fullname = Column(String)
+    fullname = Column(String, nullable=True)
     hashed_password = Column(String, nullable=False)
-    weight = Column(Integer)
-    height = Column(Integer)
+    weight = Column(Integer, nullable=True)
+    height = Column(Integer, nullable=True)
 
 
 class User_History(Base):

@@ -42,39 +42,9 @@ user_dependency = Annotated[dict, Depends(get_current_user)]
 schedule = APIRouter(prefix="/schedule", tags=["schedules"])
 
 
-@schedule.get("/create_schedule")
-def get_schedule_data(user: user_dependency, db: db_dependency):
-    exercises = (
-        db.query(Exercise)
-        .join(Exercise_Type)
-        .options(joinedload(Exercise.exercise_type))
-        .order_by(asc(Exercise_Type.exercise_type_id))
-        .all()
-    )
-    if not exercises:
-        raise HTTPException(
-            status.HTTP_404_NOT_FOUND, detail="Exercises were not found"
-        )
-
-    return {
-        "exercises": [
-            dict(
-                exercise_id=exercise.exercise_id,
-                exercise_name=exercise.exercise_name,
-                description=exercise.description,
-                instructions=exercise.instructions,
-                target_muscles=exercise.target_muscles,
-                difficulty=exercise.difficulty,
-                exercise_type_id=exercise.exercise_type_id,
-                goal_type_id=exercise.goal_type_id,
-                exercise_type_name=exercise.exercise_type.exercise_type_name,
-            )
-            for exercise in exercises
-        ]
-    }
-
-
-@schedule.post("/create_schedule")
+@schedule.post(
+    "/create_schedule", description="This endpoint creates a user related schedule"
+)
 def create_schedule(
     user: user_dependency, db: db_dependency, schedule: ScheduleRequestModel
 ):
@@ -122,7 +92,9 @@ def create_schedule(
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@schedule.get("/user_schedules/")
+@schedule.get(
+    "/user_schedules/", description="This endpoint querries user related schedules"
+)
 def get_personal_schedules(user: user_dependency, db: db_dependency):
     schedules = db.query(Schedule).filter(Schedule.user_id == user["id"]).all()
     if not schedules:
@@ -161,7 +133,10 @@ def get_personal_schedules(user: user_dependency, db: db_dependency):
     return {"schedules": schedules_dict}
 
 
-@schedule.put("/user_schedules/{schedule_id}")
+@schedule.put(
+    "/user_schedules/{schedule_id}",
+    description="This endpoint edits user related schedule by schedule_id",
+)
 def edit_personal_schedule(
     user: user_dependency,
     schedule: ScheduleRequestModel,
@@ -203,7 +178,10 @@ def edit_personal_schedule(
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@schedule.delete("/user_schedules/{schedule_id}")
+@schedule.delete(
+    "/user_schedules/{schedule_id}",
+    description="This endpoint deletes user related schedule by schedule_id",
+)
 def delete_personal_schedule(
     user: user_dependency, schedule_id: int, db: db_dependency
 ):
