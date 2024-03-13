@@ -65,6 +65,7 @@ async def create_user(
         hashed_password=bcrypt_context.hash(create_user_request.password),
         weight=create_user_request.weight,
         height=create_user_request.height,
+        active = create_user_request.active
     )
 
     # Commiting Db Additions
@@ -72,7 +73,8 @@ async def create_user(
         db.add(create_user_model)
         db.commit()
         return {"User": "Created Succesfully"}
-    except:
+    except Exception as e:
+        logging.error(f'in auth.create_user, exception: {e}')
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Username Already Exists \ Taken",
@@ -125,6 +127,7 @@ def create_access_token(username: str, user_id: int, expires_delta: timedelta):
         encode.update({"exp": expires})
         return jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)
     except JWTError:
+        logging.error(f'in auth.create_access_token exception: {JWTError}')
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Cant Encode The request."
         )
@@ -145,6 +148,7 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]):
             )
         return {"username": username, "id": user_id}
     except JWTError:
+        logging.error(f'in auth.create_access_token exception: {JWTError}')
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate user."
         )

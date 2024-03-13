@@ -10,6 +10,7 @@ class CreateUserRequest(BaseModel):
     password: str = Field(min_length=6, description='Password should be greater than 5')
     weight: Optional[int] = Field(None, gt=30, lt=300)
     height: Optional[int] = Field(None, ge=50, lt=300)
+    active: Optional[bool] = True
 
 
 class Token(BaseModel):
@@ -24,7 +25,7 @@ class GoalRequestModel(BaseModel):
     range_min: Optional[int] = None
     range_max: Optional[int] = None
     selected_exercises: List[int] = None
-    goal_type_id: int = None
+    goal_type_id: int = Field(None, ge=1)
     completed: Optional[bool] = None
 
     @validator("range_max")
@@ -41,7 +42,7 @@ class GoalRequestModel(BaseModel):
 
 
 class ScheduleRequestModel(BaseModel):
-    goal_id: Optional[int] = None
+    goal_id: Optional[int] = Field(None, ge=1)
     start_date: Optional[datetime] = None
     end_date: Optional[datetime] = None
     selected_exercises: List[int] = None

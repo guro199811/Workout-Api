@@ -84,13 +84,13 @@ def add_history(
 def bmi_history_addition(user: user_dependency, db: db_dependency, bmi_value: int):
     user_db = db.query(User).filter(User.user_id == user["id"]).first()
     add_history(db, user_db, bmi_calculation=bmi_value)
-
+    return {"message": "Bmi History Added"}
 
 @hist.delete("/{history_id}", description='This endpoint removes user history by history_id')
 def delete_user_history(user: user_dependency, db: db_dependency, history_id: int):
     history = db.query(User_History).filter(
         User_History.user_id == user["id"], User_History.history_id == history_id
-    )
+    ).first()
 
     if not history:
         raise HTTPException(status_code=404, detail="history not found")

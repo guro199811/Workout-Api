@@ -5,7 +5,8 @@ from sqlalchemy import (
     Integer,
     String,
     ForeignKey,
-    DateTime
+    DateTime,
+    Boolean
 )
 
 from datetime import datetime
@@ -20,6 +21,7 @@ class User(Base):
     hashed_password = Column(String, nullable=False)
     weight = Column(Integer, nullable=True)
     height = Column(Integer, nullable=True)
+    active = Column(Boolean, default=True)
 
 
 class User_History(Base):
